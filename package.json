@@ -1,13 +1,14 @@
 {
   "name": "sync-idb-fs",
   "version": "0.1.0",
-  "description": "Filesystem in Localstorage",
+  "description": "Filesystem with IndexedDB and a sync in memmory mirror.",
   "main": "dist/index.js",
   "scripts": {
     "test": "web-test-runner \"test/**/*.test.js\" --node-resolve",
     "build": "tsc"
   },
   "author": "",
+  "keywords": ["fs", "indexeddb"],
   "license": "ISC",
   "dependencies": {
     "idb-keyval": "^6.2.0",
