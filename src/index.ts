@@ -160,6 +160,18 @@ export class FS {
         this.#addFileToDir(filepath)
     }
 
+    chmodSync(filepath: string, mode: number): void {
+        match(nullable(this.storage.get(filepath)))
+            .with(pattern("some"), res => {
+                let file = res.value;
+                file.value[1].mode = mode
+                this.storage.set(filepath, file)
+            })
+            .otherwise(() => {
+                throw 'ENOENT';
+            })
+    }
+
     #removeFileFromDir(filepath: string) {
         let dirpath = filepath.split("/").slice(0, -1).join("/");
         let dir = match(nullable(this.storage.get(dirpath === "" ? "/" : dirpath)))
