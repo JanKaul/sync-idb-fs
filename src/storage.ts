@@ -1,0 +1,55 @@
+import { set, get, del, entries } from 'idb-keyval';
+import { variant, Variant } from 'variant-ts';
+
+export type File =
+    Variant<"File", [Uint8Array, Metadata]>
+    | Variant<"Directory", [string[], Metadata]>
+    | Variant<"Symlink", [string, Metadata]>
+
+export type Metadata = {
+    mode: number,
+    size: number
+}
+
+export class Storage {
+    mirror: Map<string, File>;
+    constructor() {
+        this.mirror = new Map();
+        setTimeout(async () => {
+            if (!await get("/")) {
+                let metadata = { mode: 0o777, size: 0 };
+                let file = variant<File>("Directory", [[], metadata])
+                await set("/", file)
+            }
+            await entries().then(x => {
+                x.forEach(y => {
+                    this.mirror.set(y[0] as string, y[1])
+                })
+            })
+        })
+    }
+    set(key: string, value: File): void {
+        setTimeout(async () => {
+            await set(key, value);
+            this.mirror.set(key, value)
+        })
+    }
+    get(key: string): File | undefined {
+        return this.mirror.get(key)
+    }
+    delete(key: string): void {
+        setTimeout(async () => {
+            await del(key);
+            this.mirror.delete(key)
+        })
+    }
+    async sync(): Promise<void> {
+        let map = new Map();
+        await entries().then(x => {
+            x.forEach(y => {
+                map.set(y[0], y[1])
+            })
+        })
+        this.mirror = map;
+    }
+}
