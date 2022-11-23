@@ -424,7 +424,7 @@ export class PromisifiedFS {
             .with(pattern("some"), res => {
                 return match(res.value)
                     .with(pattern("Directory"), res => {
-                        return res.value
+                        return res.value[0]
                     })
                     .otherwise(() => {
                         throw 'ENOTDIR';
