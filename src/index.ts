@@ -5,9 +5,14 @@ let encoder = new TextEncoder;
 let decoder = new TextDecoder;
 
 type File =
-    Variant<"File", string>
-    | Variant<"Directory", string[]>
-    | Variant<"Symlink", string>
+    Variant<"File", [string, Metadata]>
+    | Variant<"Directory", [string[], Metadata]>
+    | Variant<"Symlink", [string, Metadata]>
+
+type Metadata = {
+    mode: number,
+    size: number
+}
 
 type StatLike = {
     type: 'file' | 'dir' | 'symlink';
@@ -30,10 +35,10 @@ export class FS {
                 let file: File = JSON.parse(res.value)
                 return match(file)
                     .with(pattern("File"), res => {
-                        return encoder.encode(res.value)
+                        return encoder.encode(res.value[0])
                     })
                     .with(pattern("Symlink"), res => {
-                        return this.readFileSync(res.value, opts)
+                        return this.readFileSync(res.value[0], opts)
                     })
                     .otherwise(() => {
                         throw 'ENOENT';
@@ -45,7 +50,8 @@ export class FS {
 
     }
     writeFileSync(filepath: string, data: Uint8Array, opts: any): void {
-        let file = variant<File>("File", decoder.decode(data));
+        let metadata: Metadata = { mode: 0o777, size: data.byteLength }
+        let file = variant<File>("File", [decoder.decode(data), metadata]);
         localStorage.setItem(filepath, JSON.stringify(file))
         addFileToDir(filepath)
     }
@@ -59,7 +65,7 @@ export class FS {
                 let file: File = JSON.parse(res.value)
                 return match(file)
                     .with(pattern("Directory"), res => {
-                        return res.value
+                        return res.value[0]
                     })
                     .otherwise(() => {
                         throw 'ENOTDIR';
@@ -70,7 +76,8 @@ export class FS {
             })
     }
     mkdirSync(filepath: string, opts: any): void {
-        let file = variant<File>("Directory", []);
+        let metadata: Metadata = { mode: 0o777, size: 0 }
+        let file = variant<File>("Directory", [[], metadata]);
         localStorage.setItem(filepath, JSON.stringify(file))
         addFileToDir(filepath)
     }
@@ -83,26 +90,26 @@ export class FS {
             .with(pattern("some"), res => {
                 let file: File = JSON.parse(res.value)
                 return match(file)
-                    .with(pattern("File"), () => {
+                    .with(pattern("File"), res => {
                         return {
                             type: 'file' as 'file',
-                            mode: 0,
-                            size: 0,
+                            mode: res.value[1].mode,
+                            size: res.value[1].size,
                             ino: 0,
                             mtimeMs: 0
                         }
                     })
-                    .with(pattern("Directory"), () => {
+                    .with(pattern("Directory"), res => {
                         return {
                             type: 'dir' as 'dir',
-                            mode: 0,
-                            size: 0,
+                            mode: res.value[1].mode,
+                            size: res.value[1].size,
                             ino: 0,
                             mtimeMs: 0
                         }
                     })
                     .with(pattern("Symlink"), res => {
-                        return this.statSync(res.value, opts)
+                        return this.statSync(res.value[0], opts)
                     })
                     .exhaustive()
             })
@@ -115,20 +122,20 @@ export class FS {
             .with(pattern("some"), res => {
                 let file: File = JSON.parse(res.value)
                 return match(file)
-                    .with(pattern("File"), () => {
+                    .with(pattern("File"), res => {
                         return {
                             type: 'file' as 'file',
-                            mode: 0,
-                            size: 0,
+                            mode: res.value[1].mode,
+                            size: res.value[1].size,
                             ino: 0,
                             mtimeMs: 0
                         }
                     })
-                    .with(pattern("Directory"), () => {
+                    .with(pattern("Directory"), res => {
                         return {
                             type: 'dir' as 'dir',
-                            mode: 0,
-                            size: 0,
+                            mode: res.value[1].mode,
+                            size: res.value[1].size,
                             ino: 0,
                             mtimeMs: 0
                         }
@@ -136,8 +143,8 @@ export class FS {
                     .with(pattern("Symlink"), res => {
                         return {
                             type: 'symlink' as 'symlink',
-                            mode: 0,
-                            size: 0,
+                            mode: res.value[1].mode,
+                            size: res.value[1].size,
                             ino: 0,
                             mtimeMs: 0
                         }
@@ -154,7 +161,7 @@ export class FS {
                 let file: File = JSON.parse(res.value)
                 return match(file)
                     .with(pattern("Symlink"), res => {
-                        return res.value
+                        return res.value[0]
                     })
                     .otherwise(() => {
                         throw 'ENOENT';
@@ -165,7 +172,8 @@ export class FS {
             })
     }
     symlinkSync(target: string, filepath: string, opts: any): void {
-        let file = variant<File>("Symlink", target);
+        let metadata: Metadata = { mode: 0o777, size: 0 };
+        let file = variant<File>("Symlink", [target, metadata]);
         localStorage.setItem(filepath, JSON.stringify(file))
         addFileToDir(filepath)
     }
@@ -178,7 +186,7 @@ let removeFileFromDir = (filepath: string) => {
             let file: File = JSON.parse(res.value)
             return match(file)
                 .with(pattern("Directory"), res => {
-                    return res.value
+                    return res.value[0]
                 })
                 .otherwise(() => {
                     throw 'ENOTDIR';
@@ -188,7 +196,8 @@ let removeFileFromDir = (filepath: string) => {
             throw 'ENOENT';
         })
     let newDir = dir.filter(x => { return !(x === filepath) })
-    let file = variant<File>("Directory", newDir);
+    let metadata: Metadata = { mode: 0o777, size: 0 };
+    let file = variant<File>("Directory", [newDir, metadata]);
     localStorage.setItem(dirpath, JSON.stringify(file))
 }
 
@@ -208,6 +217,7 @@ let addFileToDir = (filepath: string) => {
         .otherwise(() => {
             throw 'ENOENT';
         })
-    let file = variant<File>("Directory", [...dir, filepath]);
+    let metadata: Metadata = { mode: 0o777, size: 0 };
+    let file = variant<File>("Directory", [[...dir, filepath], metadata]);
     localStorage.setItem(dirpath, JSON.stringify(file))
 }
