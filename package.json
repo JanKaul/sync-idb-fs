@@ -1,6 +1,6 @@
 {
   "name": "sync-idb-fs",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Filesystem with IndexedDB and a sync in memmory mirror.",
   "main": "dist/index.js",
   "scripts": {
@@ -10,6 +10,7 @@
   "author": "",
   "keywords": ["fs", "indexeddb"],
   "license": "ISC",
+  "files": ["dist/*"],
   "dependencies": {
     "idb-keyval": "^6.2.0",
     "ts-pattern": "^4.0.6",

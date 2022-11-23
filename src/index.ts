@@ -16,7 +16,7 @@ export class FS {
     constructor() {
         this.storage = new Storage();
     }
-    readFileSync(filepath: string, opts: any): Uint8Array {
+    readFileSync(filepath: string, opts?: any): Uint8Array {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
                 return match(res.value)
@@ -35,17 +35,17 @@ export class FS {
             })
 
     }
-    writeFileSync(filepath: string, data: Uint8Array, opts: any): void {
+    writeFileSync(filepath: string, data: Uint8Array, opts?: any): void {
         let metadata: Metadata = { mode: 0o777, size: data.byteLength }
         let file = variant<File>("File", [data, metadata]);
         this.storage.setSync(filepath, file)
         this.#addFileToDir(filepath)
     }
-    unlinkSync(filepath: string, opts: any): void {
+    unlinkSync(filepath: string, opts?: any): void {
         this.storage.deleteSync(filepath)
         this.#removeFileFromDir(filepath)
     }
-    readdirSync(filepath: string, opts: any): string[] {
+    readdirSync(filepath: string, opts?: any): string[] {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
                 return match(res.value)
@@ -60,17 +60,17 @@ export class FS {
                 throw 'ENOENT';
             })
     }
-    mkdirSync(filepath: string, opts: any): void {
+    mkdirSync(filepath: string, opts?: any): void {
         let metadata: Metadata = { mode: 0o777, size: 0 }
         let file = variant<File>("Directory", [[], metadata]);
         this.storage.setSync(filepath, file)
         this.#addFileToDir(filepath)
     }
-    rmdirSync(filepath: string, opts: any): void {
+    rmdirSync(filepath: string, opts?: any): void {
         this.storage.deleteSync(filepath)
         this.#removeFileFromDir(filepath)
     }
-    statSync(filepath: string, opts: any): StatLike {
+    statSync(filepath: string, opts?: any): StatLike {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
                 return match(res.value)
@@ -101,7 +101,7 @@ export class FS {
                 throw 'ENOENT';
             })
     }
-    lstatSync(filepath: string, opts: any): StatLike {
+    lstatSync(filepath: string, opts?: any): StatLike {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
                 return match(res.value)
@@ -138,7 +138,7 @@ export class FS {
                 throw 'ENOENT';
             })
     }
-    readlinkSync(filepath: string, opts: any): string {
+    readlinkSync(filepath: string, opts?: any): string {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
                 return match(res.value)
@@ -153,7 +153,7 @@ export class FS {
                 throw 'ENOENT';
             })
     }
-    symlinkSync(target: string, filepath: string, opts: any): void {
+    symlinkSync(target: string, filepath: string, opts?: any): void {
         let metadata: Metadata = { mode: 0o777, size: 0 };
         let file = variant<File>("Symlink", [target, metadata]);
         this.storage.setSync(filepath, file)
@@ -223,7 +223,7 @@ export class PromisifiedFS {
     constructor(storage: Storage) {
         this.storage = storage;
     }
-    async readFile(filepath: string, opts: any): Promise<Uint8Array> {
+    async readFile(filepath: string, opts?: any): Promise<Uint8Array> {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
                 return match(res.value)
@@ -242,17 +242,17 @@ export class PromisifiedFS {
             })
 
     }
-    async writeFile(filepath: string, data: Uint8Array, opts: any): Promise<void> {
+    async writeFile(filepath: string, data: Uint8Array, opts?: any): Promise<void> {
         let metadata: Metadata = { mode: 0o777, size: data.byteLength }
         let file = variant<File>("File", [data, metadata]);
         await this.storage.set(filepath, file)
         this.#addFileToDir(filepath)
     }
-    async unlink(filepath: string, opts: any): Promise<void> {
+    async unlink(filepath: string, opts?: any): Promise<void> {
         await this.storage.delete(filepath)
         this.#removeFileFromDir(filepath)
     }
-    async readdir(filepath: string, opts: any): Promise<string[]> {
+    async readdir(filepath: string, opts?: any): Promise<string[]> {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
                 return match(res.value)
@@ -267,17 +267,17 @@ export class PromisifiedFS {
                 throw 'ENOENT';
             })
     }
-    async mkdir(filepath: string, opts: any): Promise<void> {
+    async mkdir(filepath: string, opts?: any): Promise<void> {
         let metadata: Metadata = { mode: 0o777, size: 0 }
         let file = variant<File>("Directory", [[], metadata]);
         await this.storage.set(filepath, file)
         this.#addFileToDir(filepath)
     }
-    async rmdir(filepath: string, opts: any): Promise<void> {
+    async rmdir(filepath: string, opts?: any): Promise<void> {
         await this.storage.delete(filepath)
         this.#removeFileFromDir(filepath)
     }
-    async stat(filepath: string, opts: any): Promise<StatLike> {
+    async stat(filepath: string, opts?: any): Promise<StatLike> {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
                 return match(res.value)
@@ -308,7 +308,7 @@ export class PromisifiedFS {
                 throw 'ENOENT';
             })
     }
-    async lstat(filepath: string, opts: any): Promise<StatLike> {
+    async lstat(filepath: string, opts?: any): Promise<StatLike> {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
                 return match(res.value)
@@ -345,7 +345,7 @@ export class PromisifiedFS {
                 throw 'ENOENT';
             })
     }
-    async readlink(filepath: string, opts: any): Promise<string> {
+    async readlink(filepath: string, opts?: any): Promise<string> {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
                 return match(res.value)
@@ -360,7 +360,7 @@ export class PromisifiedFS {
                 throw 'ENOENT';
             })
     }
-    async symlink(target: string, filepath: string, opts: any): Promise<void> {
+    async symlink(target: string, filepath: string, opts?: any): Promise<void> {
         let metadata: Metadata = { mode: 0o777, size: 0 };
         let file = variant<File>("Symlink", [target, metadata]);
         await this.storage.set(filepath, file)
