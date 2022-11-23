@@ -11,6 +11,10 @@ it('test set get', async () => {
 
     await timeout(100);
 
+    fs.mkdirSync("/src/components")
+
+    await timeout(100);
+
     let dir = fs.statSync("/src").type
 
     expect(dir).to.equal('dir');
@@ -32,6 +36,10 @@ it('test set get', async () => {
     let result = fs.readFileSync("/src/index.js")
 
     expect(result).to.eq(data)
+
+    let files = fs.readdirSync("/src")
+
+    expect(files).to.contains("/src/components")
 
     fs.unlinkSync("/src/index.js")
 
