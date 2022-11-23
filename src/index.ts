@@ -106,9 +106,7 @@ export class FS {
 }
 
 let removeFileFromDir = (filepath: string) => {
-    let temp = filepath.split("/");
-    let name = temp.pop();
-    let dirpath = temp.join("/");
+    let dirpath = filepath.split("/").slice(0, -1).join("/");
     let dir = match(nullable(localStorage.getItem(dirpath)))
         .with(pattern("some"), res => {
             let file: File = JSON.parse(res.value)
@@ -123,7 +121,7 @@ let removeFileFromDir = (filepath: string) => {
         .otherwise(() => {
             throw 'ENOENT';
         })
-    let newDir = dir.filter(x => { return !(x.split("/").pop() === name) })
+    let newDir = dir.filter(x => { return !(x === filepath) })
     let file = variant<File>("Directory", newDir);
     localStorage.setItem(dirpath, JSON.stringify(file))
 }
