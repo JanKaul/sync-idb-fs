@@ -164,7 +164,7 @@ export class FS {
                 throw 'ENOENT';
             })
     }
-    symlink(target: string, filepath: string, opts: any): void {
+    symlinkSync(target: string, filepath: string, opts: any): void {
         let file = variant<File>("Symlink", target);
         localStorage.setItem(filepath, JSON.stringify(file))
         addFileToDir(filepath)
