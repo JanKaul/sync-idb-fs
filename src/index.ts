@@ -7,6 +7,7 @@ let decoder = new TextDecoder;
 type File =
     Variant<"File", string>
     | Variant<"Directory", string[]>
+    | Variant<"Symlink", string>
 
 type StatLike = {
     type: 'file' | 'dir' | 'symlink';
@@ -30,6 +31,9 @@ export class FS {
                 return match(file)
                     .with(pattern("File"), res => {
                         return encoder.encode(res.value)
+                    })
+                    .with(pattern("Symlink"), res => {
+                        return this.readFileSync(res.value, opts)
                     })
                     .otherwise(() => {
                         throw 'ENOENT';
@@ -97,11 +101,73 @@ export class FS {
                             mtimeMs: 0
                         }
                     })
+                    .with(pattern("Symlink"), res => {
+                        return this.statSync(res.value, opts)
+                    })
                     .exhaustive()
             })
             .otherwise(() => {
                 throw 'ENOENT';
             })
+    }
+    lstatSync(filepath: string, opts: any): StatLike {
+        return match(nullable(localStorage.getItem(filepath)))
+            .with(pattern("some"), res => {
+                let file: File = JSON.parse(res.value)
+                return match(file)
+                    .with(pattern("File"), () => {
+                        return {
+                            type: 'file' as 'file',
+                            mode: 0,
+                            size: 0,
+                            ino: 0,
+                            mtimeMs: 0
+                        }
+                    })
+                    .with(pattern("Directory"), () => {
+                        return {
+                            type: 'dir' as 'dir',
+                            mode: 0,
+                            size: 0,
+                            ino: 0,
+                            mtimeMs: 0
+                        }
+                    })
+                    .with(pattern("Symlink"), res => {
+                        return {
+                            type: 'symlink' as 'symlink',
+                            mode: 0,
+                            size: 0,
+                            ino: 0,
+                            mtimeMs: 0
+                        }
+                    })
+                    .exhaustive()
+            })
+            .otherwise(() => {
+                throw 'ENOENT';
+            })
+    }
+    readlinkSync(filepath: string, opts: any): string {
+        return match(nullable(localStorage.getItem(filepath)))
+            .with(pattern("some"), res => {
+                let file: File = JSON.parse(res.value)
+                return match(file)
+                    .with(pattern("Symlink"), res => {
+                        return res.value
+                    })
+                    .otherwise(() => {
+                        throw 'ENOENT';
+                    })
+            })
+            .otherwise(() => {
+                throw 'ENOENT';
+            })
+    }
+    symlink(target: string, filepath: string, opts: any): void {
+        let file = variant<File>("Symlink", target);
+        localStorage.setItem(filepath, JSON.stringify(file))
+        addFileToDir(filepath)
     }
 }
 
