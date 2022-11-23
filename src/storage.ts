@@ -28,7 +28,11 @@ export class Storage {
             })
         })
     }
-    set(key: string, value: File): void {
+    async set(key: string, value: File): Promise<void> {
+        await set(key, value);
+        this.mirror.set(key, value)
+    }
+    setSync(key: string, value: File): void {
         setTimeout(async () => {
             await set(key, value);
             this.mirror.set(key, value)
@@ -37,7 +41,11 @@ export class Storage {
     get(key: string): File | undefined {
         return this.mirror.get(key)
     }
-    delete(key: string): void {
+    async delete(key: string): Promise<void> {
+        await del(key);
+        this.mirror.delete(key)
+    }
+    deleteSync(key: string): void {
         setTimeout(async () => {
             await del(key);
             this.mirror.delete(key)
