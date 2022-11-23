@@ -53,6 +53,11 @@ export class Storage {
     }
     async sync(): Promise<void> {
         let map = new Map();
+        if (!await get("/")) {
+            let metadata = { mode: 0o777, size: 0 };
+            let file = variant<File>("Directory", [[], metadata])
+            await set("/", file)
+        }
         await entries().then(x => {
             x.forEach(y => {
                 map.set(y[0], y[1])
