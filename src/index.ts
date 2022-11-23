@@ -138,6 +138,15 @@ export class FS {
                 throw 'ENOENT';
             })
     }
+    existsSync(filepath: string, opts?: any): boolean {
+        return match(nullable(this.storage.get(filepath)))
+            .with(pattern("some"), () => {
+                return true
+            })
+            .otherwise(() => {
+                return false
+            });
+    }
     readlinkSync(filepath: string, opts?: any): string {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
@@ -344,6 +353,15 @@ export class PromisifiedFS {
             .otherwise(() => {
                 throw 'ENOENT';
             })
+    }
+    async exists(filepath: string, opts?: any): Promise<boolean> {
+        return match(nullable(this.storage.get(filepath)))
+            .with(pattern("some"), () => {
+                return true
+            })
+            .otherwise(() => {
+                return false
+            });
     }
     async readlink(filepath: string, opts?: any): Promise<string> {
         return match(nullable(this.storage.get(filepath)))
