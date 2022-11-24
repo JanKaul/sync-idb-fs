@@ -3,9 +3,7 @@ import { Storage } from '../dist/storage';
 
 it('test set get', async () => {
 
-    let storage = new Storage()
-
-    await timeout(100);
+    let storage = await Storage.construct()
 
     let data = new Uint8Array([1,2,3,4,5,6,7]);
 
@@ -22,9 +20,7 @@ it('test set get', async () => {
 
 it('test root', async () => {
 
-    let storage = new Storage()
-
-    await timeout(100);
+    let storage = await Storage.construct()
 
     let result = storage.get("/")
 

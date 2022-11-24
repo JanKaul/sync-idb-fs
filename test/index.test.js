@@ -3,9 +3,7 @@ import { FS } from '../dist/index';
 
 it('test set get', async () => {
 
-    let fs = new FS()
-
-    await timeout(100);
+    let fs = await FS.construct()
 
     fs.mkdirSync("/src")
 
@@ -52,9 +50,7 @@ it('test set get', async () => {
 
 it('test root', async () => {
 
-    let fs = new FS()
-
-    await timeout(100);
+    let fs = await FS.construct()
 
     let result = fs.readdirSync("/")
 

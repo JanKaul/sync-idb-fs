@@ -16,6 +16,11 @@ export class FS {
     constructor() {
         this.storage = new Storage();
     }
+    static async construct() {
+        let fs = new FS();
+        await fs.storage.sync();
+        return fs
+    }
     readFileSync(filepath: string, opts?: any): Uint8Array {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {

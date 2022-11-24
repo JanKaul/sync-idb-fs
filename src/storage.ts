@@ -15,18 +15,11 @@ export class Storage {
     mirror: Map<string, File>;
     constructor() {
         this.mirror = new Map();
-        setTimeout(async () => {
-            if (!await get("/")) {
-                let metadata = { mode: 0o777, size: 0 };
-                let file = variant<File>("Directory", [[], metadata])
-                await set("/", file)
-            }
-            await entries().then(x => {
-                x.forEach(y => {
-                    this.mirror.set(y[0] as string, y[1])
-                })
-            })
-        })
+    }
+    static async construct(): Promise<Storage> {
+        let storage = new Storage();
+        await storage.sync()
+        return storage
     }
     async set(key: string, value: File): Promise<void> {
         await set(key, value);
