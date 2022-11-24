@@ -27,10 +27,9 @@ export class Storage {
         this.mirror.set(key, value)
     }
     setSync(key: string, value: File): void {
-        let previous = nullable(this.mirror.get(key))
         this.mirror.set(key, value)
         setTimeout(async () => {
-            await set(key, value).catch(() => { match(previous).with(pattern("some"), res => { this.mirror.set(key, res.value) }).run() });
+            await set(key, value).catch(err => { console.log(err) });
         })
     }
     get(key: string): File | undefined {
@@ -41,10 +40,9 @@ export class Storage {
         this.mirror.delete(key)
     }
     deleteSync(key: string): void {
-        let previous = nullable(this.mirror.get(key))
         this.mirror.delete(key)
         setTimeout(async () => {
-            await del(key).catch(() => { match(previous).with(pattern("some"), res => { this.mirror.set(key, res.value) }).run() });
+            await del(key).catch(err => { console.log(err) });
         })
     }
     async sync(): Promise<void> {
