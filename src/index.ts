@@ -32,11 +32,11 @@ export class FS {
                         return this.readFileSync(res.value[0], opts)
                     })
                     .otherwise(() => {
-                        throw 'ENOENT';
+                        throw new Error(`EISDIR: Couldn't read file, ${filepath} is a directory`);
                     })
             })
             .otherwise(() => {
-                throw 'ENOENT';
+                throw new Error(`ENOENT: Couldn't read file, ${filepath} does not exist`);
             })
 
     }
@@ -58,11 +58,11 @@ export class FS {
                         return res.value[0]
                     })
                     .otherwise(() => {
-                        throw 'ENOTDIR';
+                        throw new Error(`ENOTDIR: Couldn't read directory, ${filepath} is not a directory`);
                     })
             })
             .otherwise(() => {
-                throw 'ENOENT';
+                throw new Error(`ENOENT: Couldn't read directory, ${filepath} does not exist`);
             })
     }
     mkdirSync(filepath: string, opts?: any): void {
@@ -103,7 +103,7 @@ export class FS {
                     .exhaustive()
             })
             .otherwise(() => {
-                throw 'ENOENT';
+                throw new Error(`ENOENT: Couldn't read metadata, ${filepath} does not exist`);
             })
     }
     lstatSync(filepath: string, opts?: any): StatLike {
@@ -140,7 +140,7 @@ export class FS {
                     .exhaustive()
             })
             .otherwise(() => {
-                throw 'ENOENT';
+                throw new Error(`ENOENT: Couldn't read metadata, ${filepath} does not exist`);
             })
     }
     existsSync(filepath: string, opts?: any): boolean {
@@ -160,11 +160,11 @@ export class FS {
                         return res.value[0]
                     })
                     .otherwise(() => {
-                        throw 'ENOENT';
+                        throw new Error(`ENOENT: Couldn't read symlink ${filepath} is not a symlink`);
                     })
             })
             .otherwise(() => {
-                throw 'ENOENT';
+                throw new Error(`ENOENT: Couldn't read symlink, ${filepath} does not exist`);
             })
     }
     symlinkSync(target: string, filepath: string, opts?: any): void {
@@ -182,7 +182,7 @@ export class FS {
                 this.storage.setSync(filepath, file)
             })
             .otherwise(() => {
-                throw 'ENOENT';
+                throw new Error(`ENOENT: Couldn't change mode, ${filepath} does not exist`);
             })
     }
 
@@ -199,11 +199,11 @@ export class FS {
                         return res.value[0]
                     })
                     .otherwise(() => {
-                        throw 'ENOTDIR';
+                        throw new Error(`ENOTDIR: Couldn't remove file from dir, ${filepath} is not a directory`);
                     })
             })
             .otherwise(() => {
-                throw 'ENOENT';
+                throw new Error(`ENOENT: Couldn't remove file from dir, ${filepath} does not exist`);
             })
         let newDir = dir.filter(x => { return !(x === filepath) })
         let metadata: Metadata = { mode: 0o777, size: 0 };
@@ -220,11 +220,11 @@ export class FS {
                         return res.value[0]
                     })
                     .otherwise(() => {
-                        throw 'ENOTDIR';
+                        throw new Error(`ENOTDIR: Couldn't add file to dir, ${filepath} is not a directory`);
                     })
             })
             .otherwise(() => {
-                throw 'ENOENT';
+                throw new Error(`ENOENT: Couldn't add file to dir, ${dirpath} does not exist`);
             })
         let metadata: Metadata = { mode: 0o777, size: 0 };
         let file = variant<File>("Directory", [[...dir, filepath], metadata]);
@@ -248,11 +248,11 @@ export class PromisifiedFS {
                         return this.readFile(res.value[0], opts)
                     })
                     .otherwise(() => {
-                        throw 'ENOENT';
+                        throw new Error(`EISDIR: Couln't read file, ${filepath} is a directory`);
                     })
             })
             .otherwise(() => {
-                throw 'ENOENT';
+                throw new Error(`ENOENT: Couldn't read file, ${filepath} does not exist`);
             })
 
     }
@@ -274,11 +274,11 @@ export class PromisifiedFS {
                         return res.value[0]
                     })
                     .otherwise(() => {
-                        throw 'ENOTDIR';
+                        throw new Error(`ENOTDIR: Couldn't read directory, ${filepath} is not a directory`);
                     })
             })
             .otherwise(() => {
-                throw 'ENOENT';
+                throw new Error(`ENOENT: Couldn't read directory, ${filepath} does not exist`);
             })
     }
     async mkdir(filepath: string, opts?: any): Promise<void> {
@@ -319,7 +319,7 @@ export class PromisifiedFS {
                     .exhaustive()
             })
             .otherwise(() => {
-                throw 'ENOENT';
+                throw new Error(`ENOENT: Couldn't read metadata, ${filepath} does not exist`);
             })
     }
     async lstat(filepath: string, opts?: any): Promise<StatLike> {
@@ -356,7 +356,7 @@ export class PromisifiedFS {
                     .exhaustive()
             })
             .otherwise(() => {
-                throw 'ENOENT';
+                throw new Error(`ENOENT: Couldn't read metadata, ${filepath} does not exist`);
             })
     }
     async exists(filepath: string, opts?: any): Promise<boolean> {
@@ -376,11 +376,11 @@ export class PromisifiedFS {
                         return res.value[0]
                     })
                     .otherwise(() => {
-                        throw 'ENOENT';
+                        throw new Error(`ENOENT: Couldn't read symlink, ${filepath} is not a symlink`);
                     })
             })
             .otherwise(() => {
-                throw 'ENOENT';
+                throw new Error(`ENOENT: Couldn't read symlink, ${filepath} does not exist`);
             })
     }
     async symlink(target: string, filepath: string, opts?: any): Promise<void> {
@@ -398,7 +398,7 @@ export class PromisifiedFS {
                 await this.storage.set(filepath, file)
             })
             .otherwise(() => {
-                throw 'ENOENT';
+                throw new Error(`ENOENT: Couldn't change mode, ${filepath} does not exist`);
             })
     }
 
@@ -411,11 +411,11 @@ export class PromisifiedFS {
                         return res.value[0]
                     })
                     .otherwise(() => {
-                        throw 'ENOTDIR';
+                        throw new Error(`ENOTDIR: Couldn't remove file from dir, ${dirpath} is not a directory`);
                     })
             })
             .otherwise(() => {
-                throw 'ENOENT';
+                throw new Error(`ENOENT: Couldn't remove file from dir, ${dirpath} does not exist`);
             })
         let newDir = dir.filter(x => { return !(x === filepath) })
         let metadata: Metadata = { mode: 0o777, size: 0 };
@@ -432,11 +432,11 @@ export class PromisifiedFS {
                         return res.value[0]
                     })
                     .otherwise(() => {
-                        throw 'ENOTDIR';
+                        throw new Error(`ENOTDIR: Couldn't add file to dir, ${dirpath} is not a directory`);
                     })
             })
             .otherwise(() => {
-                throw 'ENOENT';
+                throw new Error(`ENOENT: Couldn't add file to dir, ${dirpath} does not exist`);
             })
         let metadata: Metadata = { mode: 0o777, size: 0 };
         let file = variant<File>("Directory", [[...dir, filepath], metadata]);
