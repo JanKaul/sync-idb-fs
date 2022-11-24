@@ -18,15 +18,6 @@ it('test set get', async () => {
     expect(result.value[0]).to.eq(data)
 });
 
-it('test root', async () => {
-
-    let storage = await Storage.construct()
-
-    let result = storage.get("/")
-
-    expect(result.value[0][0]).to.eq(undefined)
-});
-
 function timeout(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }

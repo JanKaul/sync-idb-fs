@@ -2,7 +2,6 @@ import { expect } from '@esm-bundle/chai';
 import { FS } from '../dist/index';
 
 it('test set get', async () => {
-
     let fs = await FS.construct()
 
     fs.mkdirSync("/src")
@@ -46,15 +45,6 @@ it('test set get', async () => {
     let not_exists = fs.existsSync("/src/index.js")
 
     expect(not_exists).to.equal(false)
-});
-
-it('test root', async () => {
-
-    let fs = await FS.construct()
-
-    let result = fs.readdirSync("/")
-
-    expect(result[0]).to.eq(undefined)
 });
 
 function timeout(ms) {

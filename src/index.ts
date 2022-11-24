@@ -192,7 +192,8 @@ export class FS {
 
     #removeFileFromDir(filepath: string) {
         let dirpath = filepath.split("/").slice(0, -1).join("/");
-        let dir = match(nullable(this.storage.get(dirpath === "" ? "/" : dirpath)))
+        dirpath = dirpath === "" ? "/" : dirpath;
+        let dir = match(nullable(this.storage.get(dirpath)))
             .with(pattern("some"), res => {
                 return match(res.value)
                     .with(pattern("Directory"), res => {
@@ -213,7 +214,8 @@ export class FS {
 
     #addFileToDir(filepath: string) {
         let dirpath = filepath.split("/").slice(0, -1).join("/");
-        let dir = match(nullable(this.storage.get(dirpath === "" ? "/" : dirpath)))
+        dirpath = dirpath === "" ? "/" : dirpath;
+        let dir = match(nullable(this.storage.get(dirpath)))
             .with(pattern("some"), res => {
                 return match(res.value)
                     .with(pattern("Directory"), res => {
@@ -404,7 +406,8 @@ export class PromisifiedFS {
 
     async #removeFileFromDir(filepath: string): Promise<void> {
         let dirpath = filepath.split("/").slice(0, -1).join("/");
-        let dir = match(nullable(this.storage.get(dirpath === "" ? "/" : dirpath)))
+        dirpath = dirpath === "" ? "/" : dirpath;
+        let dir = match(nullable(this.storage.get(dirpath)))
             .with(pattern("some"), res => {
                 return match(res.value)
                     .with(pattern("Directory"), res => {
@@ -425,7 +428,8 @@ export class PromisifiedFS {
 
     async #addFileToDir(filepath: string): Promise<void> {
         let dirpath = filepath.split("/").slice(0, -1).join("/");
-        let dir = match(nullable(this.storage.get(dirpath === "" ? "/" : dirpath)))
+        dirpath = dirpath === "" ? "/" : dirpath;
+        let dir = match(nullable(this.storage.get(dirpath)))
             .with(pattern("some"), res => {
                 return match(res.value)
                     .with(pattern("Directory"), res => {
