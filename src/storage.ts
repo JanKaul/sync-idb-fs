@@ -1,5 +1,6 @@
 import { set, get, del, entries } from 'idb-keyval';
-import { variant, Variant } from 'variant-ts';
+import { match } from 'ts-pattern';
+import { nullable, pattern, variant, Variant } from 'variant-ts';
 
 export type File =
     Variant<"File", [Uint8Array, Metadata]>
@@ -26,9 +27,10 @@ export class Storage {
         this.mirror.set(key, value)
     }
     setSync(key: string, value: File): void {
+        let previous = nullable(this.mirror.get(key))
+        this.mirror.set(key, value)
         setTimeout(async () => {
-            await set(key, value);
-            this.mirror.set(key, value)
+            await set(key, value).catch(() => { match(previous).with(pattern("some"), res => { this.mirror.set(key, res.value) }).run() });
         })
     }
     get(key: string): File | undefined {
@@ -39,9 +41,10 @@ export class Storage {
         this.mirror.delete(key)
     }
     deleteSync(key: string): void {
+        let previous = nullable(this.mirror.get(key))
+        this.mirror.delete(key)
         setTimeout(async () => {
-            await del(key);
-            this.mirror.delete(key)
+            await del(key).catch(() => { match(previous).with(pattern("some"), res => { this.mirror.set(key, res.value) }).run() });
         })
     }
     async sync(): Promise<void> {
