@@ -268,6 +268,13 @@ export class PromisifiedFS {
         await this.storage.delete(filepath)
         this.#removeFileFromDir(filepath)
     }
+    async rename(oldFilepath: string, newFilepath: string, opts?: any): Promise<void> {
+        let temp = match(nullable(this.storage.get(oldFilepath))).with(pattern("some"), res => res.value).otherwise(() => { throw new Error(`ENOENT: Couldn't rename file, ${oldFilepath} does not exist`); })
+        await this.storage.delete(oldFilepath);
+        await this.storage.set(newFilepath, temp)
+        this.#removeFileFromDir(oldFilepath)
+        this.#addFileToDir(newFilepath)
+    }
     async readdir(filepath: string, opts?: any): Promise<string[]> {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
