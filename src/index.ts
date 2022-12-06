@@ -55,7 +55,7 @@ export class FS {
             .with(pattern("some"), res => {
                 return match(res.value)
                     .with(pattern("Directory"), res => {
-                        return res.value[0].map(x => { return filepath + filepath.endsWith("/") ? "" : "/" + x })
+                        return res.value[0].map(x => { return filepath + (filepath.endsWith("/") ? "" : "/") + x })
                     })
                     .otherwise(() => {
                         throw new Error(`ENOTDIR: Couldn't read directory, ${filepath} is not a directory`);
@@ -284,7 +284,7 @@ export class PromisifiedFS {
             .with(pattern("some"), res => {
                 return match(res.value)
                     .with(pattern("Directory"), res => {
-                        return res.value[0].map(x => { return filepath + filepath.endsWith("/") ? "" : "/" + x })
+                        return res.value[0].map(x => { return filepath + (filepath.endsWith("/") ? "" : "/") + x })
                     })
                     .otherwise(() => {
                         throw new Error(`ENOTDIR: Couldn't read directory, ${filepath} is not a directory`);
