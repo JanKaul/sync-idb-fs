@@ -55,7 +55,7 @@ export class FS {
             .with(pattern("some"), res => {
                 return match(res.value)
                     .with(pattern("Directory"), res => {
-                        return res.value[0]
+                        return res.value[0].map(x => { return filepath + "/" + x })
                     })
                     .otherwise(() => {
                         throw new Error(`ENOTDIR: Couldn't read directory, ${filepath} is not a directory`);
@@ -191,6 +191,7 @@ export class FS {
     }
 
     #removeFileFromDir(filepath: string) {
+        let name = filepath.slice(-1);
         let dirpath = filepath.split("/").slice(0, -1).join("/");
         dirpath = dirpath === "" ? "/" : dirpath;
         let dir = match(nullable(this.storage.get(dirpath)))
@@ -206,13 +207,14 @@ export class FS {
             .otherwise(() => {
                 throw new Error(`ENOENT: Couldn't remove file from dir, ${filepath} does not exist`);
             })
-        let newDir = dir.filter(x => { return !(x === filepath) })
+        let newDir = dir.filter(x => { return !(x === name) })
         let metadata: Metadata = { mode: 0o777, size: 0 };
         let file = variant<File>("Directory", [newDir, metadata]);
         this.storage.setSync(dirpath, file)
     }
 
     #addFileToDir(filepath: string) {
+        let name = filepath.slice(-1);
         let dirpath = filepath.split("/").slice(0, -1).join("/");
         dirpath = dirpath === "" ? "/" : dirpath;
         let dir = match(nullable(this.storage.get(dirpath)))
@@ -229,7 +231,7 @@ export class FS {
                 throw new Error(`ENOENT: Couldn't add file to dir, ${dirpath} does not exist`);
             })
         let metadata: Metadata = { mode: 0o777, size: 0 };
-        let file = variant<File>("Directory", [[...dir, filepath], metadata]);
+        let file = variant<File>("Directory", [[...dir, name], metadata]);
         this.storage.setSync(dirpath, file)
     }
 }
@@ -272,15 +274,15 @@ export class PromisifiedFS {
         let temp = match(nullable(this.storage.get(oldFilepath))).with(pattern("some"), res => res.value).otherwise(() => { throw new Error(`ENOENT: Couldn't rename file, ${oldFilepath} does not exist`); })
         await this.storage.delete(oldFilepath);
         await this.storage.set(newFilepath, temp)
-        this.#removeFileFromDir(oldFilepath)
-        this.#addFileToDir(newFilepath)
+        await this.#removeFileFromDir(oldFilepath)
+        await this.#addFileToDir(newFilepath)
     }
     async readdir(filepath: string, opts?: any): Promise<string[]> {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
                 return match(res.value)
                     .with(pattern("Directory"), res => {
-                        return res.value[0]
+                        return res.value[0].map(x => { return filepath + "/" + x })
                     })
                     .otherwise(() => {
                         throw new Error(`ENOTDIR: Couldn't read directory, ${filepath} is not a directory`);
@@ -412,6 +414,7 @@ export class PromisifiedFS {
     }
 
     async #removeFileFromDir(filepath: string): Promise<void> {
+        let name = filepath.slice(-1);
         let dirpath = filepath.split("/").slice(0, -1).join("/");
         dirpath = dirpath === "" ? "/" : dirpath;
         let dir = match(nullable(this.storage.get(dirpath)))
@@ -427,13 +430,14 @@ export class PromisifiedFS {
             .otherwise(() => {
                 throw new Error(`ENOENT: Couldn't remove file from dir, ${dirpath} does not exist`);
             })
-        let newDir = dir.filter(x => { return !(x === filepath) })
+        let newDir = dir.filter(x => { return !(x === name) })
         let metadata: Metadata = { mode: 0o777, size: 0 };
         let file = variant<File>("Directory", [newDir, metadata]);
         await this.storage.set(dirpath, file)
     }
 
     async #addFileToDir(filepath: string): Promise<void> {
+        let name = filepath.slice(-1);
         let dirpath = filepath.split("/").slice(0, -1).join("/");
         dirpath = dirpath === "" ? "/" : dirpath;
         let dir = match(nullable(this.storage.get(dirpath)))
@@ -450,7 +454,7 @@ export class PromisifiedFS {
                 throw new Error(`ENOENT: Couldn't add file to dir, ${dirpath} does not exist`);
             })
         let metadata: Metadata = { mode: 0o777, size: 0 };
-        let file = variant<File>("Directory", [[...dir, filepath], metadata]);
+        let file = variant<File>("Directory", [[...dir, name], metadata]);
         await this.storage.set(dirpath, file)
     }
 }
