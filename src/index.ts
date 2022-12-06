@@ -191,9 +191,10 @@ export class FS {
     }
 
     #removeFileFromDir(filepath: string) {
-        let name = filepath.slice(-1);
-        let dirpath = filepath.split("/").slice(0, -1).join("/");
-        dirpath = dirpath === "" ? "/" : dirpath;
+        let temp = filepath.split("/");
+        let name = temp.pop()
+        if (temp[0] === "") { temp.shift() };
+        let dirpath = "/" + temp.join("/");
         let dir = match(nullable(this.storage.get(dirpath)))
             .with(pattern("some"), res => {
                 return match(res.value)
@@ -214,9 +215,10 @@ export class FS {
     }
 
     #addFileToDir(filepath: string) {
-        let name = filepath.slice(-1);
-        let dirpath = filepath.split("/").slice(0, -1).join("/");
-        dirpath = dirpath === "" ? "/" : dirpath;
+        let temp = filepath.split("/");
+        let name = temp.pop()
+        if (temp[0] === "") { temp.shift() };
+        let dirpath = "/" + temp.join("/");
         let dir = match(nullable(this.storage.get(dirpath)))
             .with(pattern("some"), res => {
                 return match(res.value)
@@ -414,9 +416,10 @@ export class PromisifiedFS {
     }
 
     async #removeFileFromDir(filepath: string): Promise<void> {
-        let name = filepath.slice(-1);
-        let dirpath = filepath.split("/").slice(0, -1).join("/");
-        dirpath = dirpath === "" ? "/" : dirpath;
+        let temp = filepath.split("/");
+        let name = temp.pop()
+        if (temp[0] === "") { temp.shift() };
+        let dirpath = "/" + temp.join("/");
         let dir = match(nullable(this.storage.get(dirpath)))
             .with(pattern("some"), res => {
                 return match(res.value)
@@ -437,9 +440,10 @@ export class PromisifiedFS {
     }
 
     async #addFileToDir(filepath: string): Promise<void> {
-        let name = filepath.slice(-1);
-        let dirpath = filepath.split("/").slice(0, -1).join("/");
-        dirpath = dirpath === "" ? "/" : dirpath;
+        let temp = filepath.split("/");
+        let name = temp.pop()
+        if (temp[0] === "") { temp.shift() };
+        let dirpath = "/" + temp.join("/");
         let dir = match(nullable(this.storage.get(dirpath)))
             .with(pattern("some"), res => {
                 return match(res.value)
