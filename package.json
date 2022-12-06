@@ -1,6 +1,6 @@
 {
   "name": "sync-idb-fs",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "Filesystem with IndexedDB and a sync in memmory mirror.",
   "main": "dist/index.js",
   "scripts": {
