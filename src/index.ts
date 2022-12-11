@@ -232,8 +232,9 @@ export class FS {
             .otherwise(() => {
                 throw new Error(`ENOENT: Couldn't add file to dir, ${dirpath} does not exist`);
             })
+        let newDir = dir.filter(x => { return !(x === name) })
         let metadata: Metadata = { mode: 0o777, size: 0 };
-        let file = variant<File>("Directory", [[...dir, name], metadata]);
+        let file = variant<File>("Directory", [[...newDir, name], metadata]);
         this.storage.setSync(dirpath, file)
     }
 }
@@ -457,8 +458,9 @@ export class PromisifiedFS {
             .otherwise(() => {
                 throw new Error(`ENOENT: Couldn't add file to dir, ${dirpath} does not exist`);
             })
+        let newDir = dir.filter(x => { return !(x === name) })
         let metadata: Metadata = { mode: 0o777, size: 0 };
-        let file = variant<File>("Directory", [[...dir, name], metadata]);
+        let file = variant<File>("Directory", [[...newDir, name], metadata]);
         await this.storage.set(dirpath, file)
     }
 }
