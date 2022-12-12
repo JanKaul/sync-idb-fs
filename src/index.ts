@@ -24,12 +24,12 @@ export class FS {
     readFileSync(filepath: string, opts?: any): Uint8Array {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
-                return match(res.value)
+                return match(res.val)
                     .with(pattern("File"), res => {
-                        return res.value[0]
+                        return res.val[0]
                     })
                     .with(pattern("Symlink"), res => {
-                        return this.readFileSync(res.value[0], opts)
+                        return this.readFileSync(res.val[0], opts)
                     })
                     .otherwise(() => {
                         throw new Error(`EISDIR: Couldn't read file, ${filepath} is a directory`);
@@ -53,9 +53,9 @@ export class FS {
     readdirSync(filepath: string, opts?: any): string[] {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
-                return match(res.value)
+                return match(res.val)
                     .with(pattern("Directory"), res => {
-                        return res.value[0].map(x => { return filepath + (filepath.endsWith("/") ? "" : "/") + x })
+                        return res.val[0].map(x => { return filepath + (filepath.endsWith("/") ? "" : "/") + x })
                     })
                     .otherwise(() => {
                         throw new Error(`ENOTDIR: Couldn't read directory, ${filepath} is not a directory`);
@@ -78,12 +78,12 @@ export class FS {
     statSync(filepath: string, opts?: any): StatLike {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
-                return match(res.value)
+                return match(res.val)
                     .with(pattern("File"), res => {
                         return {
                             type: 'file' as 'file',
-                            mode: res.value[1].mode,
-                            size: res.value[1].size,
+                            mode: res.val[1].mode,
+                            size: res.val[1].size,
                             ino: 0,
                             mtimeMs: 0
                         }
@@ -91,14 +91,14 @@ export class FS {
                     .with(pattern("Directory"), res => {
                         return {
                             type: 'dir' as 'dir',
-                            mode: res.value[1].mode,
-                            size: res.value[1].size,
+                            mode: res.val[1].mode,
+                            size: res.val[1].size,
                             ino: 0,
                             mtimeMs: 0
                         }
                     })
                     .with(pattern("Symlink"), res => {
-                        return this.statSync(res.value[0], opts)
+                        return this.statSync(res.val[0], opts)
                     })
                     .exhaustive()
             })
@@ -109,12 +109,12 @@ export class FS {
     lstatSync(filepath: string, opts?: any): StatLike {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
-                return match(res.value)
+                return match(res.val)
                     .with(pattern("File"), res => {
                         return {
                             type: 'file' as 'file',
-                            mode: res.value[1].mode,
-                            size: res.value[1].size,
+                            mode: res.val[1].mode,
+                            size: res.val[1].size,
                             ino: 0,
                             mtimeMs: 0
                         }
@@ -122,8 +122,8 @@ export class FS {
                     .with(pattern("Directory"), res => {
                         return {
                             type: 'dir' as 'dir',
-                            mode: res.value[1].mode,
-                            size: res.value[1].size,
+                            mode: res.val[1].mode,
+                            size: res.val[1].size,
                             ino: 0,
                             mtimeMs: 0
                         }
@@ -131,8 +131,8 @@ export class FS {
                     .with(pattern("Symlink"), res => {
                         return {
                             type: 'symlink' as 'symlink',
-                            mode: res.value[1].mode,
-                            size: res.value[1].size,
+                            mode: res.val[1].mode,
+                            size: res.val[1].size,
                             ino: 0,
                             mtimeMs: 0
                         }
@@ -155,9 +155,9 @@ export class FS {
     readlinkSync(filepath: string, opts?: any): string {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
-                return match(res.value)
+                return match(res.val)
                     .with(pattern("Symlink"), res => {
-                        return res.value[0]
+                        return res.val[0]
                     })
                     .otherwise(() => {
                         throw new Error(`ENOENT: Couldn't read symlink ${filepath} is not a symlink`);
@@ -177,8 +177,8 @@ export class FS {
     chmodSync(filepath: string, mode: number): void {
         match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
-                let file = res.value;
-                file.value[1].mode = mode
+                let file = res.val;
+                file.val[1].mode = mode
                 this.storage.setSync(filepath, file)
             })
             .otherwise(() => {
@@ -197,9 +197,9 @@ export class FS {
         let dirpath = "/" + temp.join("/");
         let dir = match(nullable(this.storage.get(dirpath)))
             .with(pattern("some"), res => {
-                return match(res.value)
+                return match(res.val)
                     .with(pattern("Directory"), res => {
-                        return res.value[0]
+                        return res.val[0]
                     })
                     .otherwise(() => {
                         throw new Error(`ENOTDIR: Couldn't remove file from dir, ${filepath} is not a directory`);
@@ -221,9 +221,9 @@ export class FS {
         let dirpath = "/" + temp.join("/");
         let dir = match(nullable(this.storage.get(dirpath)))
             .with(pattern("some"), res => {
-                return match(res.value)
+                return match(res.val)
                     .with(pattern("Directory"), res => {
-                        return res.value[0]
+                        return res.val[0]
                     })
                     .otherwise(() => {
                         throw new Error(`ENOTDIR: Couldn't add file to dir, ${filepath} is not a directory`);
@@ -247,12 +247,12 @@ export class PromisifiedFS {
     async readFile(filepath: string, opts?: any): Promise<Uint8Array> {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
-                return match(res.value)
+                return match(res.val)
                     .with(pattern("File"), res => {
-                        return res.value[0]
+                        return res.val[0]
                     })
                     .with(pattern("Symlink"), res => {
-                        return this.readFile(res.value[0], opts)
+                        return this.readFile(res.val[0], opts)
                     })
                     .otherwise(() => {
                         throw new Error(`EISDIR: Couln't read file, ${filepath} is a directory`);
@@ -274,7 +274,7 @@ export class PromisifiedFS {
         this.#removeFileFromDir(filepath)
     }
     async rename(oldFilepath: string, newFilepath: string, opts?: any): Promise<void> {
-        let temp = match(nullable(this.storage.get(oldFilepath))).with(pattern("some"), res => res.value).otherwise(() => { throw new Error(`ENOENT: Couldn't rename file, ${oldFilepath} does not exist`); })
+        let temp = match(nullable(this.storage.get(oldFilepath))).with(pattern("some"), res => res.val).otherwise(() => { throw new Error(`ENOENT: Couldn't rename file, ${oldFilepath} does not exist`); })
         await this.storage.delete(oldFilepath);
         await this.storage.set(newFilepath, temp)
         await this.#removeFileFromDir(oldFilepath)
@@ -283,9 +283,9 @@ export class PromisifiedFS {
     async readdir(filepath: string, opts?: any): Promise<string[]> {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
-                return match(res.value)
+                return match(res.val)
                     .with(pattern("Directory"), res => {
-                        return res.value[0].map(x => { return filepath + (filepath.endsWith("/") ? "" : "/") + x })
+                        return res.val[0].map(x => { return filepath + (filepath.endsWith("/") ? "" : "/") + x })
                     })
                     .otherwise(() => {
                         throw new Error(`ENOTDIR: Couldn't read directory, ${filepath} is not a directory`);
@@ -308,12 +308,12 @@ export class PromisifiedFS {
     async stat(filepath: string, opts?: any): Promise<StatLike> {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
-                return match(res.value)
+                return match(res.val)
                     .with(pattern("File"), res => {
                         return {
                             type: 'file' as 'file',
-                            mode: res.value[1].mode,
-                            size: res.value[1].size,
+                            mode: res.val[1].mode,
+                            size: res.val[1].size,
                             ino: 0,
                             mtimeMs: 0
                         }
@@ -321,14 +321,14 @@ export class PromisifiedFS {
                     .with(pattern("Directory"), res => {
                         return {
                             type: 'dir' as 'dir',
-                            mode: res.value[1].mode,
-                            size: res.value[1].size,
+                            mode: res.val[1].mode,
+                            size: res.val[1].size,
                             ino: 0,
                             mtimeMs: 0
                         }
                     })
                     .with(pattern("Symlink"), res => {
-                        return this.stat(res.value[0], opts)
+                        return this.stat(res.val[0], opts)
                     })
                     .exhaustive()
             })
@@ -339,12 +339,12 @@ export class PromisifiedFS {
     async lstat(filepath: string, opts?: any): Promise<StatLike> {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
-                return match(res.value)
+                return match(res.val)
                     .with(pattern("File"), res => {
                         return {
                             type: 'file' as 'file',
-                            mode: res.value[1].mode,
-                            size: res.value[1].size,
+                            mode: res.val[1].mode,
+                            size: res.val[1].size,
                             ino: 0,
                             mtimeMs: 0
                         }
@@ -352,8 +352,8 @@ export class PromisifiedFS {
                     .with(pattern("Directory"), res => {
                         return {
                             type: 'dir' as 'dir',
-                            mode: res.value[1].mode,
-                            size: res.value[1].size,
+                            mode: res.val[1].mode,
+                            size: res.val[1].size,
                             ino: 0,
                             mtimeMs: 0
                         }
@@ -361,8 +361,8 @@ export class PromisifiedFS {
                     .with(pattern("Symlink"), res => {
                         return {
                             type: 'symlink' as 'symlink',
-                            mode: res.value[1].mode,
-                            size: res.value[1].size,
+                            mode: res.val[1].mode,
+                            size: res.val[1].size,
                             ino: 0,
                             mtimeMs: 0
                         }
@@ -385,9 +385,9 @@ export class PromisifiedFS {
     async readlink(filepath: string, opts?: any): Promise<string> {
         return match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), res => {
-                return match(res.value)
+                return match(res.val)
                     .with(pattern("Symlink"), res => {
-                        return res.value[0]
+                        return res.val[0]
                     })
                     .otherwise(() => {
                         throw new Error(`ENOENT: Couldn't read symlink, ${filepath} is not a symlink`);
@@ -407,8 +407,8 @@ export class PromisifiedFS {
     async chmod(filepath: string, mode: number): Promise<void> {
         await match(nullable(this.storage.get(filepath)))
             .with(pattern("some"), async res => {
-                let file = res.value;
-                file.value[1].mode = mode
+                let file = res.val;
+                file.val[1].mode = mode
                 await this.storage.set(filepath, file)
             })
             .otherwise(() => {
@@ -423,9 +423,9 @@ export class PromisifiedFS {
         let dirpath = "/" + temp.join("/");
         let dir = match(nullable(this.storage.get(dirpath)))
             .with(pattern("some"), res => {
-                return match(res.value)
+                return match(res.val)
                     .with(pattern("Directory"), res => {
-                        return res.value[0]
+                        return res.val[0]
                     })
                     .otherwise(() => {
                         throw new Error(`ENOTDIR: Couldn't remove file from dir, ${dirpath} is not a directory`);
@@ -447,9 +447,9 @@ export class PromisifiedFS {
         let dirpath = "/" + temp.join("/");
         let dir = match(nullable(this.storage.get(dirpath)))
             .with(pattern("some"), res => {
-                return match(res.value)
+                return match(res.val)
                     .with(pattern("Directory"), res => {
-                        return res.value[0]
+                        return res.val[0]
                     })
                     .otherwise(() => {
                         throw new Error(`ENOTDIR: Couldn't add file to dir, ${dirpath} is not a directory`);
