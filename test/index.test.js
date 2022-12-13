@@ -8,6 +8,10 @@ it('test set get', async () => {
 
     await timeout(100);
 
+    let root = fs.readdirSync("/")
+
+    expect(root).to.contains("/src")
+
     fs.mkdirSync("/src/components")
 
     await timeout(100);
