@@ -9,11 +9,11 @@ it('test set get', async () => {
 
     let file = {tag: "File", value: [data, { mode: 0o777, size: data.byteLength}]}
 
-    storage.set("/my_file",file);
+    storage.set(["my_file"],file);
 
     await timeout(100);
 
-    let result = storage.get("/my_file")
+    let result = storage.get(["my_file"])
 
     expect(result.value[0]).to.eq(data)
 });
