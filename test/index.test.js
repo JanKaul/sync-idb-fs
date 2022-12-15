@@ -30,23 +30,33 @@ it('test set get', async () => {
 
     expect(exists).to.equal(true)
 
-    let file = fs.statSync("/src/index.js").type
+    let file1 = fs.statSync("/src/index.js").type
 
-    expect(file).to.equal('file')
+    expect(file1).to.equal('file')
 
     let result = fs.readFileSync("/src/index.js")
 
     expect(result).to.eq(data)
 
-    let files = fs.readdirSync("/src")
+    let files1 = fs.readdirSync("/src")
 
-    expect(files).to.contains("/src/components")
+    expect(files1).to.contains("/src/components")
 
-    fs.unlinkSync("/src/index.js")
+    await fs.promises.rename("/src","/base")
+
+    let files2 = fs.readdirSync("/base")
+
+    expect(files2).to.contains("/base/components")
+
+    let file2 = fs.statSync("/base/index.js").type
+
+    expect(file2).to.equal('file')
+
+    fs.unlinkSync("/base/index.js")
 
     await timeout(100);
 
-    let not_exists = fs.existsSync("/src/index.js")
+    let not_exists = fs.existsSync("/base/index.js")
 
     expect(not_exists).to.equal(false)
 });
