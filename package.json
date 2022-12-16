@@ -1,10 +1,11 @@
 {
   "name": "sync-idb-fs",
-  "version": "0.1.19",
+  "version": "0.1.20",
   "description": "Filesystem with IndexedDB and a sync in memmory mirror.",
   "main": "dist/index.js",
   "scripts": {
     "test": "web-test-runner \"test/**/*.test.js\" --node-resolve",
+    "test:watch": "web-test-runner \"test/**/*.test.js\" --node-resolve --watch",
     "build": "tsc"
   },
   "author": "",

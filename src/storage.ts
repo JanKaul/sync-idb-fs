@@ -32,11 +32,12 @@ export class Storage {
             this.mirror.set(decoder.decode(identifier), value)
             await set(decoder.decode(identifier), value);
         } else {
-            let identifier = new Uint8Array(16)
-            crypto.getRandomValues(identifier);
-            this.mirror.set(decoder.decode(identifier), value)
-            await set(decoder.decode(identifier), value);
-            await this.#addFileToDir(key, identifier)
+            let bytes = new Uint8Array(16)
+            crypto.getRandomValues(bytes);
+            let identifier = decoder.decode(bytes);
+            this.mirror.set(identifier, value)
+            await set(identifier, value);
+            await this.#addFileToDir(key, encoder.encode(identifier))
         }
         return Promise.resolve()
     }
@@ -47,7 +48,9 @@ export class Storage {
     }
     get(key: string[]): File | undefined {
         let identifier = nullable(this.#getIdentifier(key));
-        return identifier.map(x => { return this.mirror.get(decoder.decode(x)) }).toUndefined()
+        return identifier.flatMap(x => {
+            return nullable(this.mirror.get(decoder.decode(x)))
+        }).toUndefined()
     }
     async delete(key: string[]): Promise<void> {
         let identifier = this.#getIdentifier(key);

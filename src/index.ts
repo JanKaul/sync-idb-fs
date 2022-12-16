@@ -192,14 +192,14 @@ export class PromisifiedFS {
         this.storage = storage;
     }
     async readFile(filepath: string, opts?: any): Promise<Uint8Array> {
-        return match(nullable(this.storage.get(stringToPath(filepath))))
+        return await match(nullable(this.storage.get(stringToPath(filepath))))
             .with(pattern("some"), res => {
                 return match(res.val)
                     .with(pattern("File"), res => {
-                        return res.val[0]
+                        return Promise.resolve(res.val[0])
                     })
-                    .with(pattern("Symlink"), res => {
-                        return this.readFile(res.val[0], opts)
+                    .with(pattern("Symlink"), async res => {
+                        return await this.readFile(res.val[0], opts)
                     })
                     .otherwise(() => {
                         throw new Error(`EISDIR: Couln't read file, ${filepath} is a directory`);
@@ -224,11 +224,11 @@ export class PromisifiedFS {
         await this.storage.set(stringToPath(newFilepath), temp)
     }
     async readdir(filepath: string, opts?: any): Promise<string[]> {
-        return match(nullable(this.storage.get(stringToPath(filepath))))
+        return await match(nullable(this.storage.get(stringToPath(filepath))))
             .with(pattern("some"), res => {
                 return match(res.val)
                     .with(pattern("Directory"), res => {
-                        return [...res.val[0].keys()].map(x => { return filepath + (filepath.endsWith("/") ? "" : "/") + x })
+                        return Promise.resolve([...res.val[0].keys()].map(x => { return filepath + (filepath.endsWith("/") ? "" : "/") + x }))
                     })
                     .otherwise(() => {
                         throw new Error(`ENOTDIR: Couldn't read directory, ${filepath} is not a directory`);
@@ -247,29 +247,29 @@ export class PromisifiedFS {
         await this.storage.delete(stringToPath(filepath))
     }
     async stat(filepath: string, opts?: any): Promise<StatLike> {
-        return match(nullable(this.storage.get(stringToPath(filepath))))
+        return await match(nullable(this.storage.get(stringToPath(filepath))))
             .with(pattern("some"), res => {
                 return match(res.val)
                     .with(pattern("File"), res => {
-                        return {
+                        return Promise.resolve({
                             type: 'file' as 'file',
                             mode: res.val[1].mode,
                             size: res.val[1].size,
                             ino: 0,
                             mtimeMs: 0
-                        }
+                        })
                     })
                     .with(pattern("Directory"), res => {
-                        return {
+                        return Promise.resolve({
                             type: 'dir' as 'dir',
                             mode: res.val[1].mode,
                             size: res.val[1].size,
                             ino: 0,
                             mtimeMs: 0
-                        }
+                        })
                     })
-                    .with(pattern("Symlink"), res => {
-                        return this.stat(res.val[0], opts)
+                    .with(pattern("Symlink"), async res => {
+                        return await this.stat(res.val[0], opts)
                     })
                     .exhaustive()
             })
@@ -278,35 +278,35 @@ export class PromisifiedFS {
             })
     }
     async lstat(filepath: string, opts?: any): Promise<StatLike> {
-        return match(nullable(this.storage.get(stringToPath(filepath))))
+        return await match(nullable(this.storage.get(stringToPath(filepath))))
             .with(pattern("some"), res => {
                 return match(res.val)
                     .with(pattern("File"), res => {
-                        return {
+                        return Promise.resolve({
                             type: 'file' as 'file',
                             mode: res.val[1].mode,
                             size: res.val[1].size,
                             ino: 0,
                             mtimeMs: 0
-                        }
+                        })
                     })
                     .with(pattern("Directory"), res => {
-                        return {
+                        return Promise.resolve({
                             type: 'dir' as 'dir',
                             mode: res.val[1].mode,
                             size: res.val[1].size,
                             ino: 0,
                             mtimeMs: 0
-                        }
+                        })
                     })
                     .with(pattern("Symlink"), res => {
-                        return {
+                        return Promise.resolve({
                             type: 'symlink' as 'symlink',
                             mode: res.val[1].mode,
                             size: res.val[1].size,
                             ino: 0,
                             mtimeMs: 0
-                        }
+                        })
                     })
                     .exhaustive()
             })
@@ -315,20 +315,20 @@ export class PromisifiedFS {
             })
     }
     async exists(filepath: string, opts?: any): Promise<boolean> {
-        return match(nullable(this.storage.get(stringToPath(filepath))))
+        return await match(nullable(this.storage.get(stringToPath(filepath))))
             .with(pattern("some"), () => {
-                return true
+                return Promise.resolve(true)
             })
             .otherwise(() => {
-                return false
+                return Promise.resolve(false)
             });
     }
     async readlink(filepath: string, opts?: any): Promise<string> {
-        return match(nullable(this.storage.get(stringToPath(filepath))))
+        return await match(nullable(this.storage.get(stringToPath(filepath))))
             .with(pattern("some"), res => {
                 return match(res.val)
                     .with(pattern("Symlink"), res => {
-                        return res.val[0]
+                        return Promise.resolve(res.val[0])
                     })
                     .otherwise(() => {
                         throw new Error(`ENOENT: Couldn't read symlink, ${filepath} is not a symlink`);
