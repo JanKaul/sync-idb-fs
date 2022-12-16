@@ -228,7 +228,7 @@ export class PromisifiedFS {
             .with(pattern("some"), res => {
                 return match(res.val)
                     .with(pattern("Directory"), res => {
-                        return [res.val[0].keys()].map(x => { return filepath + (filepath.endsWith("/") ? "" : "/") + x })
+                        return [...res.val[0].keys()].map(x => { return filepath + (filepath.endsWith("/") ? "" : "/") + x })
                     })
                     .otherwise(() => {
                         throw new Error(`ENOTDIR: Couldn't read directory, ${filepath} is not a directory`);
